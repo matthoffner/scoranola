@@ -5,7 +5,7 @@
     <body>
         <div id="menu">
             <h2>Scoranola</h2>
-            <h4>Sheet music page turning musical player</h4>
+            <h4>Sheet music page turning player</h4>
             <button onClick="">
                 <h3>Upload</h3>
             </button>
@@ -26,59 +26,15 @@
                     <h3>Record</h3>
                 </button>
                 <button>⏺️</button>
-                <button>▶️</button>
                 <button>⏩</button>
             </div>
         </div>
         <br />
-        <div id="player">
+        <div>
             <div>
-                <button>
-                    <h3>Player</h3>
-                </button>
                 <div>
+                    <button><h3>Player</h3></button>
                     <div id="player"></div>
-                    <script>
-                        var tag = document.createElement('script');
-                        tag.src = "https://www.youtube.com/iframe_api";
-                        var firstScriptTag = document.getElementsByTagName('script')[0];
-                        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-                        var player;
-                        var youtubeUrl = window.location.search.split('yt=')[1] || document.getElementById('youtube-url').value;
-
-                        function onYouTubeIframeAPIReady() {
-                            player = new YT.Player('player', {
-                                height: '390',
-                                width: '640',
-                                videoId: youtubeUrl.split('v=')[1].split('&')[0],
-                                playerVars: {
-                                    'playsinline': 1
-                                },
-                                events: {
-                                    'onReady': onPlayerReady,
-                                    'onStateChange': onPlayerStateChange
-                                }
-                            });
-                        }
-
-                        function onPlayerReady(event) {
-                            // console.log('starting video');
-                            // event.target.playVideo();
-                        }
-
-                        function onPlayerStateChange(event) {
-                            console.log(event);
-                            if (event.data === 1) {
-                                console.log('starting playback', event.target);
-                                console.log('the current playback time is: ', event.target.getCurrentTime());
-                                console.log('the current page is: ');
-                            }
-                            if (event.data === 2) {
-                                console.log('pausing playback');
-                            }
-                        }
-                    </script>
-                    <iframe width="350" height="250" src=""></iframe>
                 </div>
             </div>
         </div>
@@ -93,7 +49,6 @@
             pdfjsDist.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/build/pdf.worker.min.js";
             import Dexie from "https://unpkg.com/dexie@latest/dist/modern/dexie.mjs";
             var url = '';
-            // var loadingTask = pdfjsDist.getDocument(url);
             var pdfDoc = null,
                 pageNum = 1,
                 pageRendering = false,
@@ -101,42 +56,30 @@
                 scale = 1,
                 canvas = document.getElementById('viewer'),
                 ctx = canvas.getContext('2d');
-            /**
-             * Get page info from document, resize canvas accordingly, and render page.
-             * @param num Page number.
-             */
+                
             function renderPage(num) {
                 pageRendering = true;
-                // Using promise to fetch the page
                 pdfDoc.getPage(num).then(function(page) {
                     var viewport = page.getViewport({
                         scale: scale
                     });
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
-                    // Render PDF page into canvas context
                     var renderContext = {
                         canvasContext: ctx,
                         viewport: viewport
                     };
                     var renderTask = page.render(renderContext);
-                    // Wait for rendering to finish
                     renderTask.promise.then(function() {
                         pageRendering = false;
                         if (pageNumPending !== null) {
-                            // New page rendering is pending
                             renderPage(pageNumPending);
                             pageNumPending = null;
                         }
                     });
                 });
-                // Update page counters
                 document.getElementById('page_num').textContent = num;
             }
-            /**
-             * If another page rendering in progress, waits until the rendering is
-             * finised. Otherwise, executes rendering immediately.
-             */
             function queueRenderPage(num) {
                 if (pageRendering) {
                     pageNumPending = num;
@@ -144,9 +87,6 @@
                     renderPage(num);
                 }
             }
-            /**
-             * Displays previous page.
-             */
             function onPrevPage() {
                 if (pageNum <= 1) {
                     return;
@@ -155,9 +95,6 @@
                 queueRenderPage(pageNum);
             }
             document.getElementById('prev').addEventListener('click', onPrevPage);
-            /**
-             * Displays next page.
-             */
             function onNextPage() {
                 if (pageNum >= pdfDoc.numPages) {
                     return;
@@ -166,23 +103,14 @@
                 queueRenderPage(pageNum);
             }
             document.getElementById('next').addEventListener('click', onNextPage);
+            
             /*
-            function onPlayButton() {
-
-            }
-
-            document.getElementById('playbutton').addEventListener('click', onPlayButton);
-
             function onRecordButton() {
-
             }
-
             document.getElementById('recordbutton').addEventListener('click', onRecordButton);
-
             function onNextPageButton() {
               console.log()
             }
-
             document.getElementById('nextpagebutton').addEventListener('click', onNextPageButton);
             */
             function readPdfFile(file) {
@@ -210,48 +138,59 @@
             document.getElementById('youtube-url').addEventListener('change', function(e) {
                 e.preventDefault()
                 console.log(e);
-                // reload with query param to save time
             }, {
                 passive: false
             });
-            /*
-            pdfjsDist.getDocument(url).promise.then(function(pdfDoc_) {
-                pdfDoc = pdfDoc_;
-                document.getElementById('page_count').textContent = pdfDoc.numPages;
-                // Initial/first page rendering
-                renderPage(pageNum);
-            });
-            */
-            const schema = {
-                file: {
-                    sequence: [{
-                        page: 1,
-                        timestamp: 1234,
-                    }, {
-                        page: 2,
-                        timestamp: 2345,
-                    }]
+            window.addEventListener('message',function(event) {
+                const timestampData = JSON.parse(event.data);
+                if (timestampData.event === 'infoDelivery') {
+                    console.log('current time', timestampData.info.currentTime);
+                    /*
+                    proof of concept
+                    if (timestampData.info.currentTime >= 1350 && timestampData.info.currentTime <= 1351) {
+                        renderPage(5);
+                    }
+                    */
                 }
-            };
+            }, false);
+        </script>
+        <script>
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            var player;
+            var youtubeUrl = window.location.search.split('yt=')[1] || document.getElementById('youtube-url').value;
+
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                    height: '390',
+                    width: '640',
+                    videoId: youtubeUrl.split('v=')[1].split('&')[0],
+                    playerVars: {
+                        'playsinline': 1
+                    },
+                    events: {
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+            function onPlayerStateChange(event) {
+                if (event.data === 1) {
+                    console.log('starting playback', event.target);
+                }
+                if (event.data === 2) {
+                    console.log('pausing playback');
+                }
+            }
         </script>
         <style>
             body {
-                background:
-                    url('https://rawcdn.githack.com/alexmwalker/0-like-bubbles/d1ef8d69c8272875e73256c55a7b1eca87b948b6/assets/3-unit.png') repeat-x 0 0/auto 100%,
-                    url('https://rawcdn.githack.com/alexmwalker/0-like-bubbles/a56d4769e9e1509ef9f525391b0a402bf9d3f779/assets/single.jpg') repeat-x 0 0/auto 100%;
-                justify-content: left;
+                background: url('https://e7.pngegg.com/pngimages/732/960/png-clipart-red-curtains-curtain-long-curtain.png') repeat-x 0 0/auto 100%;
             }
-
             html {
                 color: white;
                 font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            }
-
-            .curtain:hover {
-                background:
-                    url('https://rawcdn.githack.com/alexmwalker/0-like-bubbles/87b1b23fb45671f25553c5ce8a4898870aeb0afb/assets/7-unit.png') repeat-x 0 0/auto 100%,
-                    linear-gradient(0deg, rgba(0, 167, 157, .3) 0%, rgba(255, 238, 207, .3) 100%) repeat-x 0 0/auto 100%,
-                    url('https://rawcdn.githack.com/alexmwalker/0-like-bubbles/a56d4769e9e1509ef9f525391b0a402bf9d3f779/assets/single.jpg') repeat-x 0 0/auto 100%;
             }
         </style>
     </body>
