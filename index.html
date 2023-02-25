@@ -12,7 +12,7 @@
             <div id="menu-items">
                 <div>
                     <input id="pdf-file" value="Upload PDF" type="file" />
-                    <input id="youtube-url" value="Music URL" type="url" />
+                    <input id="youtube-url" value="https://www.youtube.com/watch?v=Xplx64LVENg&t=1164s" type="url" />
                     <button>upload</button>
                 </div>
                 <h4>🎼 Uploaded Scores</h4>
@@ -44,12 +44,13 @@
                         var firstScriptTag = document.getElementsByTagName('script')[0];
                         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
                         var player;
+                        var youtubeUrl = window.location.search.split('yt=')[1] || document.getElementById('youtube-url').value;
 
                         function onYouTubeIframeAPIReady() {
                             player = new YT.Player('player', {
                                 height: '390',
                                 width: '640',
-                                videoId: 'Xplx64LVENg',
+                                videoId: youtubeUrl.split('v=')[1].split('&')[0],
                                 playerVars: {
                                     'playsinline': 1
                                 },
@@ -206,6 +207,13 @@
             }, {
                 passive: false
             });
+            document.getElementById('youtube-url').addEventListener('change', function(e) {
+                e.preventDefault()
+                console.log(e);
+                // reload with query param to save time
+            }, {
+                passive: false
+            });
             /*
             pdfjsDist.getDocument(url).promise.then(function(pdfDoc_) {
                 pdfDoc = pdfDoc_;
@@ -226,5 +234,25 @@
                 }
             };
         </script>
+        <style>
+            body {
+                background:
+                    url('https://rawcdn.githack.com/alexmwalker/0-like-bubbles/d1ef8d69c8272875e73256c55a7b1eca87b948b6/assets/3-unit.png') repeat-x 0 0/auto 100%,
+                    url('https://rawcdn.githack.com/alexmwalker/0-like-bubbles/a56d4769e9e1509ef9f525391b0a402bf9d3f779/assets/single.jpg') repeat-x 0 0/auto 100%;
+                justify-content: left;
+            }
+
+            html {
+                color: white;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            }
+
+            .curtain:hover {
+                background:
+                    url('https://rawcdn.githack.com/alexmwalker/0-like-bubbles/87b1b23fb45671f25553c5ce8a4898870aeb0afb/assets/7-unit.png') repeat-x 0 0/auto 100%,
+                    linear-gradient(0deg, rgba(0, 167, 157, .3) 0%, rgba(255, 238, 207, .3) 100%) repeat-x 0 0/auto 100%,
+                    url('https://rawcdn.githack.com/alexmwalker/0-like-bubbles/a56d4769e9e1509ef9f525391b0a402bf9d3f779/assets/single.jpg') repeat-x 0 0/auto 100%;
+            }
+        </style>
     </body>
 </html>
