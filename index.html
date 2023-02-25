@@ -1,0 +1,97 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <div id="viewer" />
+        <div id="menu">
+            <h2>pageturner</h2>
+            <h4>Record and play back page turns to a music score. Upload a PDF with corresponding music URL. Enjoy score reading without the effort.</h4>
+            <button onClick=""><h3>Upload</h3></button>
+            <div id="menu-items">
+                <div>
+                    <input id="pdf-file" value="Upload PDF" type="file" />
+                    <input id="youtube-url" value="Music URL" type="url" />
+                    <button>upload</button>
+                </div>
+                <h4>🎼 Uploaded Scores</h4>
+                <div>Mahler 3.pdf | Mahler 3 youtube</div>
+            </div>
+        </div>
+        <br />
+        <div id="recorder">
+            <div>
+                <button><h3>Record</h3></button>
+                <button>⏺️</button>
+                <button>▶️</button>
+                <button>⏩</button>
+            </div>
+        </div>
+        <br />
+        <div id="player">
+            <div>
+                <button><h3>Player</h3></button>
+                <div>
+                    <div id="player"></div>
+                    <script>
+                        var tag = document.createElement('script');
+                        tag.src = "https://www.youtube.com/iframe_api";
+                        var firstScriptTag = document.getElementsByTagName('script')[0];
+                        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                        var player;
+                        function onYouTubeIframeAPIReady() {
+                            player = new YT.Player('player', {
+                                height: '390',
+                                width: '640',
+                                videoId: 'Xplx64LVENg',
+                                playerVars: {
+                                    'playsinline': 1
+                                },
+                                events: {
+                                    'onReady': onPlayerReady,
+                                    'onStateChange': onPlayerStateChange
+                                }
+                            });
+                        }
+
+                        function onPlayerReady(event) {
+                            // console.log('starting video');
+                            // event.target.playVideo();
+                        }
+
+                        function onPlayerStateChange(event) {
+                            console.log(event);
+                            if (event.data === 1) {
+                                console.log('starting playback', event.target);
+                            }
+                            if (event.data === 2) {
+                                console.log('pausing playback');
+                            }
+                        }
+                    </script>
+                    <iframe width="350" height="250" src=""></iframe>
+                </div>
+            </div>
+        </div>
+        <script type="module">
+            import pdfjsDist from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/+esm'
+            pdfjsDist.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/build/pdf.worker.min.js";
+            
+            import Dexie from "https://unpkg.com/dexie@latest/dist/modern/dexie.mjs";
+
+            console.log(pdfjsDist);
+            
+            const schema = {
+                file: {
+                    sequence: [{
+                        page: 1,
+                        timestamp: 1234,
+                    }, {
+                        page: 2,
+                        timestamp: 2345,
+                    }]
+                }
+            };
+        </script>
+    </body>
+</html>
