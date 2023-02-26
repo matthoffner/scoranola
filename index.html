@@ -10,9 +10,9 @@
                 <div>
                     <input id="pdf-file" value="Upload PDF" type="file" />
                     <input id="youtube-url" value="https://www.youtube.com/watch?v=uny1hzKg6hk" type="url" />
-                    <button>upload</button>
+                    <button id="load-url">load</button>
                 </div>
-                <h4>🎼 Uploaded Scores</h4>
+                <h4>🎼 Loaded Scores</h4>
                 <div>Beethoven 5 Mov 4.pdf</div>
             </div>
         </div>
@@ -92,14 +92,17 @@
                 queueRenderPage(pageNum);
             }
             document.getElementById('prev').addEventListener('click', onPrevPage);
+            var globalClock;
+            var recordLog = [];
             function onNextPage() {
                 if (pageNum >= pdfDoc.numPages) {
                     return;
                 }
                 pageNum++;
+                recordLog[pageNum] = globalClock;
                 queueRenderPage(pageNum);
             }
-            document.getElementById('next').addEventListener('click', onNextPage);
+            document.getElementById('next').addEventListener('click', onNextPage);            
             
             /*
             function onRecordButton() {
@@ -114,15 +117,15 @@
                 const reader = new FileReader()
                 reader.readAsArrayBuffer(file)
                 reader.onload = function() {
-                    const pdfData = reader.result
+                    const pdfData = reader.result;
                     const loadingTask = pdfjsDist.getDocument({
                         data: pdfData
-                    })
+                    });
                     loadingTask.promise.then(function(pdfDoc_) {
                         pdfDoc = pdfDoc_;
                         document.getElementById('page_count').textContent = pdfDoc.numPages;
                         renderPage(1)
-                    })
+                    });
                 }
             }
             document.getElementById('pdf-file').addEventListener('change', function(e) {
@@ -132,9 +135,13 @@
             }, {
                 passive: false
             });
-            document.getElementById('youtube-url').addEventListener('change', function(e) {
+            document.getElementById('load-url').addEventListener('click', function(e) {
                 e.preventDefault()
-                console.log(e);
+                const yturl = document.getElementById('youtube-url');
+                const validurl = new URL(yturl.target.value);
+                if (validUrl) {
+                    window.location = 'https://' + window.location.host + window.location.pathname + '?yt=' + validurl;
+                }
             }, {
                 passive: false
             });
@@ -150,12 +157,18 @@
                 const min = Math.min.apply(Math, indexArr)
                 return arr[indexArr.indexOf(min)]
             }
+            var recordMode = false;
             window.addEventListener('message',function(event) {
                 const timestampData = JSON.parse(event.data);
                 if (timestampData.event === 'infoDelivery') {
                     const bestGuess = [...Array(66).keys()].map(v => v * 10); // demo until recording works
                     const whichPage = findClosest(timestampData.info.currentTime, bestGuess);
-                    renderPage(bestGuess.indexOf(whichPage));
+                    globalClock = timestampData.info.currentTime;
+                    if (recordMode) {
+                        return;
+                    } else {
+                        renderPage(bestGuess.indexOf(whichPage));
+                    }
                 }
             }, false);
         </script>
