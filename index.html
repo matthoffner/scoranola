@@ -52,6 +52,10 @@
                 
             function renderPage(num) {
                 pageRendering = true;
+                const alreadyHere = document.getElementById('page_num').textContent;
+                if (num === parseInt(alreadyHere, 10)) {
+                    return null;
+                }
                 pdfDoc.getPage(num).then(function(page) {
                     var viewport = page.getViewport({
                         scale: scale
@@ -138,18 +142,20 @@
             loadingTask.promise.then(function(pdfDoc_) {
                 pdfDoc = pdfDoc_;
                 document.getElementById('page_count').textContent = pdfDoc.numPages;
-                renderPage(1)
+                renderPage(1);
             })
+            var recordLog = [];
+            const findClosest = function (x, arr) {
+                const indexArr = arr.map(function(k) { return Math.abs(k - x) })
+                const min = Math.min.apply(Math, indexArr)
+                return arr[indexArr.indexOf(min)]
+            }
             window.addEventListener('message',function(event) {
                 const timestampData = JSON.parse(event.data);
                 if (timestampData.event === 'infoDelivery') {
-                    console.log('current time', timestampData.info.currentTime);
-                    /*
-                    proof of concept
-                    if (timestampData.info.currentTime >= 1350 && timestampData.info.currentTime <= 1351) {
-                        renderPage(5);
-                    }
-                    */
+                    const bestGuess = [...Array(66).keys()].map(v => v * 10); // demo until recording works
+                    const whichPage = findClosest(timestampData.info.currentTime, bestGuess);
+                    renderPage(bestGuess.indexOf(whichPage));
                 }
             }, false);
         </script>
