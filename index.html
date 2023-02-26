@@ -18,9 +18,10 @@
         </div>
         <br />
         <div id="recorder">
-            <div>
-                <button>⏺️</button>
-                <button>⏩</button>
+            <div style="cursor:pointer;">
+                <h1 id="recordbutton">⏺️</h1>
+                <div id="record-status">Not recording</div>
+                <div id="record-output"></div>
             </div>
         </div>
         <br />
@@ -40,7 +41,6 @@
         <script type="module">
             import pdfjsDist from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/+esm'
             pdfjsDist.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/build/pdf.worker.min.js";
-            import Dexie from "https://unpkg.com/dexie@latest/dist/modern/dexie.mjs";
             var url = 'sample.pdf';
             var pdfDoc = null,
                 pageNum = 1,
@@ -93,26 +93,37 @@
             }
             document.getElementById('prev').addEventListener('click', onPrevPage);
             var globalClock;
+            var recordMode = false;
             var recordLog = [];
             function onNextPage() {
                 if (pageNum >= pdfDoc.numPages) {
                     return;
                 }
                 pageNum++;
-                recordLog[pageNum] = globalClock;
+                if (recordMode) {
+                    recordLog[pageNum] = globalClock;
+                    var log = document.getElementById('record-output');
+                    var urlWeAreUsing = document.getElementById('youtube-url').value;
+                    log.innerHTML = log.innerHTML + `<br />added to ${pageNum}: ${globalClock}`;
+                    localStorage.setItem(urlWeAreUsing, recordLog.filter(Boolean));    
+                }
                 queueRenderPage(pageNum);
             }
             document.getElementById('next').addEventListener('click', onNextPage);            
             
-            /*
             function onRecordButton() {
+                if (!recordMode) {
+                    document.getElementById('recordbutton').innerText = '⏹️';
+                    document.getElementById('record-status').innerText = 'Recording';
+                    recordMode = true;
+                } else if (recordMode) {
+                    document.getElementById('recordbutton').innerText = '⏺️';
+                    document.getElementById('record-status').innerText = 'Not recording';
+                    recordMode = false;
+                }
+                
             }
             document.getElementById('recordbutton').addEventListener('click', onRecordButton);
-            function onNextPageButton() {
-              console.log()
-            }
-            document.getElementById('nextpagebutton').addEventListener('click', onNextPageButton);
-            */
             function readPdfFile(file) {
                 const reader = new FileReader()
                 reader.readAsArrayBuffer(file)
@@ -138,7 +149,7 @@
             document.getElementById('load-url').addEventListener('click', function(e) {
                 e.preventDefault()
                 const yturl = document.getElementById('youtube-url');
-                const validurl = new URL(yturl.target.value);
+                const validurl = new URL(yturl.value);
                 if (validUrl) {
                     window.location = 'https://' + window.location.host + window.location.pathname + '?yt=' + validurl;
                 }
@@ -157,16 +168,21 @@
                 const min = Math.min.apply(Math, indexArr)
                 return arr[indexArr.indexOf(min)]
             }
-            var recordMode = false;
             window.addEventListener('message',function(event) {
                 const timestampData = JSON.parse(event.data);
                 if (timestampData.event === 'infoDelivery') {
                     const bestGuess = [...Array(66).keys()].map(v => v * 10); // demo until recording works
-                    const whichPage = findClosest(timestampData.info.currentTime, bestGuess);
+                    const youtubeUrlWeAreUsing = document.getElementById('youtube-url').value;
+                    var localStorageMatch = localStorage.getItem(youtubeUrlWeAreUsing);
                     globalClock = timestampData.info.currentTime;
+                    var whichPage;
                     if (recordMode) {
                         return;
+                    } else if (localStorageMatch) {
+                        whichPage = findClosest(timestampData.info.currentTime, localStorageMatch.split(','));
+                        renderPage(bestGuess.indexOf(whichPage));
                     } else {
+                        whichPage = findClosest(timestampData.info.currentTime, bestGuess);
                         renderPage(bestGuess.indexOf(whichPage));
                     }
                 }
