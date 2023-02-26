@@ -6,25 +6,19 @@
         <div id="menu">
             <h2>Scoranola</h2>
             <h4>Sheet music page turning player</h4>
-            <button onClick="">
-                <h3>Upload</h3>
-            </button>
             <div id="menu-items">
                 <div>
                     <input id="pdf-file" value="Upload PDF" type="file" />
-                    <input id="youtube-url" value="https://www.youtube.com/watch?v=Xplx64LVENg&t=1164s" type="url" />
+                    <input id="youtube-url" value="https://www.youtube.com/watch?v=uny1hzKg6hk" type="url" />
                     <button>upload</button>
                 </div>
                 <h4>🎼 Uploaded Scores</h4>
-                <div>Mahler 3.pdf | Mahler 3 youtube</div>
+                <div>Beethoven 5 Mov 4.pdf</div>
             </div>
         </div>
         <br />
         <div id="recorder">
             <div>
-                <button>
-                    <h3>Record</h3>
-                </button>
                 <button>⏺️</button>
                 <button>⏩</button>
             </div>
@@ -33,7 +27,6 @@
         <div>
             <div>
                 <div>
-                    <button><h3>Player</h3></button>
                     <div id="player"></div>
                 </div>
             </div>
@@ -48,7 +41,7 @@
             import pdfjsDist from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/+esm'
             pdfjsDist.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/build/pdf.worker.min.js";
             import Dexie from "https://unpkg.com/dexie@latest/dist/modern/dexie.mjs";
-            var url = '';
+            var url = 'sample.pdf';
             var pdfDoc = null,
                 pageNum = 1,
                 pageRendering = false,
@@ -141,6 +134,12 @@
             }, {
                 passive: false
             });
+            const loadingTask = pdfjsDist.getDocument(url);
+            loadingTask.promise.then(function(pdfDoc_) {
+                pdfDoc = pdfDoc_;
+                document.getElementById('page_count').textContent = pdfDoc.numPages;
+                renderPage(1)
+            })
             window.addEventListener('message',function(event) {
                 const timestampData = JSON.parse(event.data);
                 if (timestampData.event === 'infoDelivery') {
