@@ -4,16 +4,20 @@
     </head>
     <body>
         <div id="menu">
-            <h2>Scoranola</h2>
-            <h4>Sheet music page turning player</h4>
+            <h2><i><u>scoranola</u></i></h2>
             <div id="menu-items">
                 <div>
                     <input id="pdf-file" value="Upload PDF" type="file" />
                     <input id="youtube-url" value="https://www.youtube.com/watch?v=uny1hzKg6hk" type="url" />
                     <button id="load-url">load</button>
                 </div>
-                <h4>🎼 Loaded Scores</h4>
-                <div id="scores">Beethoven 5 Mov 4.pdf</div>
+            </div>
+        </div>
+        <div>
+            <div>
+                <div style="padding:10px;">
+                    <div id="player"></div>
+                </div>
             </div>
         </div>
         <br />
@@ -26,18 +30,11 @@
         </div>
         <br />
         <div>
-            <div>
-                <div>
-                    <div id="player"></div>
-                </div>
-            </div>
-        </div>
-        <div>
             <button id="prev">Previous</button>
             <button id="next">Next</button> &nbsp; &nbsp; <span>Page: <span id="page_num"></span> / <span id="page_count"></span>
             </span>
         </div>
-        <canvas style="height: 60vh; width: 80vw; display: block;" id="viewer" />
+        <canvas style="align-items: center; height: 60vh; display: block;" id="viewer" />
         <script type="module">
             import pdfjsDist from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/+esm'
             pdfjsDist.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.3.122/build/pdf.worker.min.js";
@@ -202,8 +199,8 @@
 
             function onYouTubeIframeAPIReady() {
                 player = new YT.Player('player', {
-                    height: '390',
-                    width: '640',
+                    height: '180',
+                    width: '390',
                     videoId: youtubeUrl.split('v=')[1].split('&')[0],
                     playerVars: {
                         'playsinline': 1
@@ -224,12 +221,13 @@
         </script>
         <style>
             body {
+                padding: 10px;
                 background: linear-gradient(
                     90deg, 
                     rgba(2,0,36,1) 0%, rgba(237,19,19,1) 6%, rgba(0,0,0,1) 10%, rgba(237,19,19,1) 15%, rgba(0,0,0,1) 20%,
                     rgba(237,19,19,1) 25%,rgba(2,0,36,1) 30%, rgba(237,19,19,1) 35%, rgba(0,0,0,1) 40%, rgba(237,19,19,1) 45%,
                     rgba(0,0,0,1) 50%, rgba(237,19,19,1) 55%,rgba(2,0,36,1) 60%, rgba(237,19,19,1) 65%, rgba(0,0,0,1) 70%,
-                    rgba(237,19,19,1) 75%, rgba(0,0,0,1) 80%, rgba(237,19,19,1) 85%, rgba(0,0,0,1) 90%, rgba(237,19,19,1)  95%);
+                    rgba(237,19,19,1) 75%, rgba(0,0,0,1) 80%, rgba(237,19,19,1) 85%, rgba(0,0,0,1) 90%, rgba(237,19,19,1)  95%, rgba(0,0,0,1) 100%);
             }
             html {
                 color: white;
