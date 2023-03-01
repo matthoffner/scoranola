@@ -171,17 +171,15 @@
             window.addEventListener('message',function(event) {
                 const timestampData = JSON.parse(event.data);
                 if (timestampData.event === 'infoDelivery') {
-                    const bestGuess = [...Array(66).keys()].map(v => v * 10); // demo until recording works
+                    const bestGuess = [...Array(parseInt(document.getElementById('page_count').innerText, 10)).keys()].map(v => v * 10);
                     const youtubeUrlWeAreUsing = getUrl();
                     var localStorageMatch = localStorage.getItem(youtubeUrlWeAreUsing);
                     globalClock = timestampData.info.currentTime;
                     console.log(localStorageMatch);
                     var whichPage;
-                    if (recordMode) {
-                        return;
-                    } else if (localStorageMatch) {
+                    if (localStorageMatch && !recordMode) {
                         whichPage = findClosest(timestampData.info.currentTime, localStorageMatch.split(','));
-                        renderPage(bestGuess.indexOf(whichPage));
+                        renderPage(localStorageMatch.indexOf(whichPage));
                     } else {
                         whichPage = findClosest(timestampData.info.currentTime, bestGuess);
                         renderPage(bestGuess.indexOf(whichPage));
