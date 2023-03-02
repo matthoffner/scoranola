@@ -26,6 +26,7 @@
                 <h1 id="recordbutton">⏺️</h1>
                 <div id="record-status">Not recording</div>
                 <div id="record-output"></div>
+                <div id="record-log"></div>
             </div>
         </div>
         <br />
@@ -86,7 +87,7 @@
                     return;
                 }
                 pageNum--;
-                queueRenderPage(pageNum);
+                renderPage(pageNum);
             }
             document.getElementById('prev').addEventListener('click', onPrevPage);
             var globalClock;
@@ -96,15 +97,19 @@
                 if (pageNum >= pdfDoc.numPages) {
                     return;
                 }
-                pageNum++;
                 if (recordMode) {
-                    recordLog[pageNum] = globalClock;
                     var log = document.getElementById('record-output');
                     var urlWeAreUsing = document.getElementById('youtube-url').value;
-                    log.innerHTML = log.innerHTML + `<br />added to ${pageNum}: ${globalClock}`;
-                    localStorage.setItem(urlWeAreUsing, recordLog.filter(Boolean));    
+                    var nextPage = parseInt(document.getElementById('page_num').innerText, 10) + 1;
+                    recordLog[nextPage] = globalClock;
+                    localStorage.setItem(urlWeAreUsing, recordLog.filter(Boolean));
+                    const demo = "131.988219,140.225548,147.1293,152.713354,158.553414,169.71358,179.53759,184.852194,191.753427,199.193759,205.832824,209.555322,219.913436,226.818462,236.914507,243.28948,256.041774,264.801501,270.113768,278.617634,286.052257,294.553456,298.009672,305.714151,310.226091,316.075145,322.178086,328.553597,340.241727,350.601613,363.881623,379.817191,386.724769,393.370116,398.676188,407.194025,415.161266,424.994672,436.945135,441.724766,451.817696,459.254411,460.585457,466.963078,477.316368,488.212782,498.306403,505.476527,511.324456,519.55516,531.769899,539.210025,547.977958,557.276465,565.77012,573.210016,573.210016,585.963912,589.412983,594.994893,598.452702,603.225979,609.338219,613.588916,619.963815";
+                    pageNum++;
+                    renderPage(nextPage);
+                } else {
+                    pageNum++;
+                    renderPage(pageNum);
                 }
-                queueRenderPage(pageNum);
             }
             document.getElementById('next').addEventListener('click', onNextPage);            
             
@@ -174,15 +179,31 @@
                     const bestGuess = [...Array(parseInt(document.getElementById('page_count').innerText, 10)).keys()].map(v => v * 10);
                     const youtubeUrlWeAreUsing = getUrl();
                     var localStorageMatch = localStorage.getItem(youtubeUrlWeAreUsing);
+                    document.getElementById('record-log').textContent = JSON.stringify(localStorageMatch);
                     globalClock = timestampData.info.currentTime;
-                    console.log(localStorageMatch);
                     var whichPage;
-                    if (localStorageMatch && !recordMode) {
-                        whichPage = findClosest(timestampData.info.currentTime, localStorageMatch.split(','));
-                        renderPage(localStorageMatch.indexOf(whichPage));
+                    var pageturnLog;
+                    var foundPage;
+                    if (localStorageMatch) {
+                        const pageNumCount = parseInt(document.getElementById('page_num').textContent, 10);
+                        pageturnLog = localStorageMatch.split(',')
+                        console.log(pageturnLog.length, bestGuess.length);
+                        if (pageturnLog.length + 1 === bestGuess.length && pageNumCount > 0) {
+                            whichPage = findClosest(timestampData.info.currentTime, pageturnLog);
+                            foundPage = pageturnLog.indexOf(whichPage);
+                            if (foundPage > 0) {
+                                console.log('turning page from recorded match:', foundPage + 1)
+                                renderPage(foundPage + 1);
+                                pageNum++;
+                            } else {
+                                console.log('now what?', foundPage, timestampData.info.currentTime);
+                            }
+                        }
                     } else {
                         whichPage = findClosest(timestampData.info.currentTime, bestGuess);
+                        console.log('found best guess match at ', whichPage, 'page:', bestGuess.indexOf(whichPage));
                         renderPage(bestGuess.indexOf(whichPage));
+                        pageNum++;
                     }
                 }
             }, false);
