@@ -8,8 +8,21 @@
             <div id="menu-items">
                 <div>
                     <input id="pdf-file" value="Upload PDF" type="file" />
-                    <input id="youtube-url" value="https://www.youtube.com/watch?v=uny1hzKg6hk" type="url" />
+                    <input id="youtube-url" value="https://www.youtube.com/embed/uny1hzKg6hk" type="url" />
                     <button id="load-url">load</button>
+                </div>
+            </div>
+            <br />
+            <canvas id="viewer"></canvas>
+            <br />
+            <br />
+            <div>
+                <button id="prev">Previous</button>
+                <button id="next">Next</button> &nbsp; &nbsp; <span>Page: <span id="page_num"></span> / <span id="page_count"></span>
+                </span>
+                <div style="cursor:pointer;" id="recorder">
+                    <h1 id="recordbutton">⏺️</h1>
+                    <div id="record-status"></div>
                 </div>
             </div>
         </div>
@@ -18,22 +31,11 @@
                 <div style="padding:10px;">
                     <div style="cursor:pointer;">
                         <div id="player"></div>
-                        <div id="recorder">
-                            <h1 id="recordbutton">⏺️</h1>
-                            <div id="record-status"></div>
-                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
         <br />
-        <div>
-            <button id="prev">Previous</button>
-            <button id="next">Next</button> &nbsp; &nbsp; <span>Page: <span id="page_num"></span> / <span id="page_count"></span>
-            </span>
-        </div>
-        <br />
-        <canvas id="viewer"></canvas>
         <br />
         <br />
         <div id="record-output"></div>
@@ -119,9 +121,13 @@
                 if (!recordMode) {
                     document.getElementById('recordbutton').innerText = '⏹️';
                     document.getElementById('record-status').innerText = 'Recording';
+                    const currentYoutubeUrl = document.getElementById('youtube-url').getAttribute('value');
+                    var startPlayer = document.getElementsByTagName('iframe')[0];
+                    startPlayer.setAttribute('src', `${currentYoutubeUrl}?autoplay=1`);
                     recordMode = true;
                 } else if (recordMode) {
                     document.getElementById('recordbutton').innerText = '⏺️';
+                    document.getElementById('record-status').innerText = '';
                     recordMode = false;
                 }
                 
@@ -176,6 +182,7 @@
             }
             window.addEventListener('message',function(event) {
                 const timestampData = JSON.parse(event.data);
+                console.log(event);
                 if (timestampData.event === 'infoDelivery') {
                     const bestGuess = [...Array(parseInt(document.getElementById('page_count').innerText, 10)).keys()].map(v => v * 10);
                     const youtubeUrlWeAreUsing = getUrl();
@@ -222,7 +229,7 @@
                 player = new YT.Player('player', {
                     height: '180',
                     width: '390',
-                    videoId: youtubeUrl.split('v=')[1].split('&')[0],
+                    videoId: youtubeUrl.split('embed/')[1],
                     playerVars: {
                         'playsinline': 1
                     },
