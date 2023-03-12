@@ -24,6 +24,7 @@
                     <h1 id="recordbutton">⏺️</h1>
                     <div id="record-status"></div>
                 </div>
+                
             </div>
         </div>
         <div>
@@ -107,6 +108,7 @@
                     var nextPage = parseInt(document.getElementById('page_num').innerText, 10) + 1;
                     recordLog[nextPage] = globalClock;
                     localStorage.setItem(urlWeAreUsing, recordLog.filter(Boolean));
+                    document.getElementById('record-status').innerText = `Saved ${nextPage} at ${globalClock}`;
                     const demo = "131.988219,140.225548,147.1293,152.713354,158.553414,169.71358,179.53759,184.852194,191.753427,199.193759,205.832824,209.555322,219.913436,226.818462,236.914507,243.28948,256.041774,264.801501,270.113768,278.617634,286.052257,294.553456,298.009672,305.714151,310.226091,316.075145,322.178086,328.553597,340.241727,350.601613,363.881623,379.817191,386.724769,393.370116,398.676188,407.194025,415.161266,424.994672,436.945135,441.724766,451.817696,459.254411,460.585457,466.963078,477.316368,488.212782,498.306403,505.476527,511.324456,519.55516,531.769899,539.210025,547.977958,557.276465,565.77012,573.210016,573.210016,585.963912,589.412983,594.994893,598.452702,603.225979,609.338219,613.588916,619.963815";
                     pageNum++;
                     renderPage(nextPage);
@@ -121,9 +123,6 @@
                 if (!recordMode) {
                     document.getElementById('recordbutton').innerText = '⏹️';
                     document.getElementById('record-status').innerText = 'Recording';
-                    const currentYoutubeUrl = document.getElementById('youtube-url').getAttribute('value');
-                    var startPlayer = document.getElementsByTagName('iframe')[0];
-                    startPlayer.setAttribute('src', `${currentYoutubeUrl}?autoplay=1`);
                     recordMode = true;
                 } else if (recordMode) {
                     document.getElementById('recordbutton').innerText = '⏺️';
@@ -182,7 +181,6 @@
             }
             window.addEventListener('message',function(event) {
                 const timestampData = JSON.parse(event.data);
-                console.log(event);
                 if (timestampData.event === 'infoDelivery') {
                     const bestGuess = [...Array(parseInt(document.getElementById('page_count').innerText, 10)).keys()].map(v => v * 10);
                     const youtubeUrlWeAreUsing = getUrl();
@@ -192,11 +190,14 @@
                     var whichPage;
                     var pageturnLog;
                     var foundPage;
+                    if (recordMode) {
+                        return;
+                    }
                     if (localStorageMatch) {
                         const pageNumCount = parseInt(document.getElementById('page_num').textContent, 10);
                         pageturnLog = localStorageMatch.split(',')
                         console.log(pageturnLog.length, bestGuess.length);
-                        if (pageturnLog.length + 1 === bestGuess.length && pageNumCount > 0) {
+                        if (pageNumCount > 0) {
                             document.getElementById('record-status').textContent = 'Playback from recording';
                             whichPage = findClosest(timestampData.info.currentTime, pageturnLog);
                             foundPage = pageturnLog.indexOf(whichPage);
@@ -252,10 +253,10 @@
                 text-align: center;
                 background: linear-gradient(
                     90deg, 
-                    rgba(2,0,36,1) 0%, rgba(237,19,19,1) 6%, rgba(0,0,0,1) 10%, rgba(237,19,19,1) 15%, rgba(0,0,0,1) 20%,
-                    rgba(237,19,19,1) 25%,rgba(2,0,36,1) 30%, rgba(237,19,19,1) 35%, rgba(0,0,0,1) 40%, rgba(237,19,19,1) 45%,
-                    rgba(0,0,0,1) 50%, rgba(237,19,19,1) 55%,rgba(2,0,36,1) 60%, rgba(237,19,19,1) 65%, rgba(0,0,0,1) 70%,
-                    rgba(237,19,19,1) 75%, rgba(0,0,0,1) 80%, rgba(237,19,19,1) 85%, rgba(0,0,0,1) 90%, rgba(237,19,19,1)  95%, rgba(0,0,0,1) 100%);
+                    rgba(2,0,36,1) 0%, rgb(139,19,19) 6%, rgba(0,0,0,1) 10%, rgb(139,19,19) 15%, rgba(0,0,0,1) 20%,
+                    rgb(139, 19, 19) 25%,rgba(2,0,36,1) 30%, rgb(139,19,19) 35%, rgba(0,0,0,1) 40%, rgb(139,19,19) 45%,
+                    rgba(0,0,0,1) 50%, rgb(139,19,19) 55%,rgba(2,0,36,1) 60%, rgb(139,19,19) 65%, rgba(0,0,0,1) 70%,
+                    rgb(139,19,19) 75%, rgba(0,0,0,1) 80%, rgb(139,19,19) 85%, rgba(0,0,0,1) 90%, rgb(139,19,19)  95%, rgba(0,0,0,1) 100%);
             }
             html {
                 color: white;
